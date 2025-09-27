@@ -210,7 +210,7 @@ const App: React.FC = () => {
             {renderContent()}
         </div>
       </main>
-      <footer className="text-center p-4 text-sm text-slate-200">
+      <footer className="text-center p-4 text-sm text-slate-400">
         <button onClick={() => setIsGlossaryOpen(true)} className="flex items-center gap-2 mx-auto text-indigo-300 hover:text-indigo-100 font-medium transition-colors">
             <BookOpenIcon className="w-5 h-5"/> Manage Custom Glossary
         </button>
