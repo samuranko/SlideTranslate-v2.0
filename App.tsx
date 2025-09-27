@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { FileUpload } from './components/FileUpload';
 import { ProcessingView } from './components/ProcessingView';
@@ -11,13 +11,14 @@ import { extractSlideData, reassemblePptx } from './services/pptxService';
 import { extractDocxData, reassembleDocx } from './services/docxService';
 import { extractXlsxData, reassembleXlsx } from './services/xlsxService';
 import { translatePresentation, translateDocx, translateXlsx } from './services/geminiService';
+import { getGlossary, saveGlossary } from './services/storageService';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('initial');
   const [file, setFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<FileType>(null);
   const [targetLanguage, setTargetLanguage] = useState(SUPPORTED_LANGUAGES[1].code); // Default to Spanish
-  const [glossary, setGlossary] = useState<GlossaryTerm[]>([]);
+  const [glossary, setGlossary] = useState<GlossaryTerm[]>(() => getGlossary(targetLanguage));
   const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
@@ -27,6 +28,15 @@ const App: React.FC = () => {
   const [docxData, setDocxData] = useState<DocxData | null>(null);
   const [xlsxData, setXlsxData] = useState<XlsxData | null>(null);
 
+  useEffect(() => {
+    saveGlossary(targetLanguage, glossary);
+  }, [glossary, targetLanguage]);
+
+  const handleLanguageChange = (newLanguageCode: string) => {
+    setTargetLanguage(newLanguageCode);
+    setGlossary(getGlossary(newLanguageCode));
+  };
+  
   const resetState = () => {
     setAppState('initial');
     setFile(null);
@@ -125,11 +135,11 @@ const App: React.FC = () => {
   };
 
   const handleAddGlossaryTerm = (term: GlossaryTerm) => {
-    setGlossary([...glossary, term]);
+    setGlossary(prev => [...prev, term]);
   };
   
   const handleDeleteGlossaryTerm = (index: number) => {
-    setGlossary(glossary.filter((_, i) => i !== index));
+    setGlossary(prev => prev.filter((_, i) => i !== index));
   };
 
 
@@ -141,7 +151,7 @@ const App: React.FC = () => {
                 onFileUpload={handleFileUpload} 
                 disabled={false}
                 targetLanguage={targetLanguage}
-                onLanguageChange={setTargetLanguage}
+                onLanguageChange={handleLanguageChange}
             />
         );
       case 'processing':
@@ -182,16 +192,26 @@ const App: React.FC = () => {
     }
   };
 
+  const backgroundStyle: React.CSSProperties = {
+    backgroundImage: `linear-gradient(rgba(10, 20, 40, 0.6), rgba(10, 20, 40, 0.6)), url('data:image/jpeg;base64,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')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div 
+        className="flex flex-col min-h-screen font-sans text-slate-900"
+        style={backgroundStyle}
+    >
       <Header />
       <main className="flex-grow container mx-auto p-4 flex flex-col items-center justify-center">
         <div className="w-full bg-white rounded-lg shadow-xl p-6 md:p-8 my-8">
             {renderContent()}
         </div>
       </main>
-      <footer className="text-center p-4 text-sm text-slate-500">
-        <button onClick={() => setIsGlossaryOpen(true)} className="flex items-center gap-2 mx-auto text-indigo-600 hover:text-indigo-800 font-medium">
+      <footer className="text-center p-4 text-sm text-slate-200">
+        <button onClick={() => setIsGlossaryOpen(true)} className="flex items-center gap-2 mx-auto text-indigo-300 hover:text-indigo-100 font-medium transition-colors">
             <BookOpenIcon className="w-5 h-5"/> Manage Custom Glossary
         </button>
         <p className="mt-2">Powered by Google Gemini</p>

@@ -9,6 +9,11 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'pt', name: 'Portuguese' },
   { code: 'ru', name: 'Russian' },
   { code: 'zh', name: 'Chinese' },
+  { code: 'sr', name: 'Serbian' },
+  { code: 'ar', name: 'Arabic' },
+  { code: 'vi', name: 'Vietnamese' },
+  { code: 'fi', name: 'Finnish' },
+  { code: 'sv', name: 'Swedish' },
 ];
 
 export const SUPPORTED_FILE_TYPES = {
