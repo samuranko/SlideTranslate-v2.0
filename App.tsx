@@ -195,6 +195,7 @@ const App: React.FC = () => {
             <BookOpenIcon className="w-5 h-5"/> Manage Custom Glossary
         </button>
         <p className="mt-2">Powered by Google Gemini</p>
+        <p className="mt-2">Copyright 2025 - Scott Muranko. All rights reserved</p>
       </footer>
       <GlossaryModal 
         isOpen={isGlossaryOpen} 
